@@ -49,12 +49,12 @@ $(LIBOPUS_DIR)/autogen.sh $(LIBSPEEXDSP_DIR)/autogen.sh:
 
 $(LIBOPUS_OBJ): $(LIBOPUS_DIR)/autogen.sh
 	cd $(LIBOPUS_DIR); ./autogen.sh
-	cd $(LIBOPUS_DIR); emconfigure ./configure --disable-extra-programs --disable-doc --disable-intrinsics --disable-rtcd --disable-stack-protector
+	cd $(LIBOPUS_DIR); emconfigure ./configure --disable-extra-programs --disable-doc --disable-intrinsics --disable-rtcd --disable-stack-protector --disable-neon
 	cd $(LIBOPUS_DIR); emmake make
 
 $(LIBSPEEXDSP_OBJ): $(LIBSPEEXDSP_DIR)/autogen.sh
 	cd $(LIBSPEEXDSP_DIR); ./autogen.sh
-	cd $(LIBSPEEXDSP_DIR); emconfigure ./configure --disable-examples
+	cd $(LIBSPEEXDSP_DIR); emconfigure ./configure --disable-examples --disable-neon
 	cd $(LIBSPEEXDSP_DIR); emmake make
 
 $(LIBOPUS_ENCODER): $(LIBOPUS_ENCODER_SRC) $(LIBOPUS_OBJ) $(LIBSPEEXDSP_OBJ)
