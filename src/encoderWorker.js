@@ -15,8 +15,11 @@ const OggOpusEncoder = function( config, Module ){
     maxFramesPerPage: 40, // Tradeoff latency with overhead
     numberOfChannels: 1,
     originalSampleRate: 44100,
-    resampleQuality: 3, // Value between 0 and 10 inclusive. 10 being highest quality.
-    serial: Math.floor(Math.random() * 4294967296)
+    resampleQuality: 3, // Value between 0 and 10 inclusive. 10 being highest quality.	  
+    serial: Math.floor(Math.random() * 4294967296),
+    encodeRaw: false
+
+	  
   }, config );
 
   this._opus_encoder_create = Module._opus_encoder_create;
@@ -71,6 +74,14 @@ OggOpusEncoder.prototype.encode = function( buffers ) {
     if ( this.resampleBufferIndex === this.resampleBufferLength ) {
       this._speex_resampler_process_interleaved_float( this.resampler, this.resampleBufferPointer, this.resampleSamplesPerChannelPointer, this.encoderBufferPointer, this.encoderSamplesPerChannelPointer );
       var packetLength = this._opus_encode_float( this.encoder, this.encoderBufferPointer, this.encoderSamplesPerChannel, this.encoderOutputPointer, this.encoderOutputMaxLength );
+	  if (this.config.encodeRaw) {
+        this.resampleBufferIndex = 0;
+        if (packetLength <= 0) {
+          return [];
+        }
+		var page = this.encoderOutputBuffer.subarray(0, packetLength).slice(0, packetLength);
+  		return [{message: 'page', page:  page}];
+	  }
       exportPages.concat(this.segmentPacket( packetLength ));
       this.resampleBufferIndex = 0;
 
@@ -104,6 +115,10 @@ OggOpusEncoder.prototype.destroy = function() {
 };
 
 OggOpusEncoder.prototype.flush = function() {
+  if (this.config.encodeRaw) {
+    this.resampleBufferIndex = 0;	  
+    return [];
+  }
   var exportPage;
   if ( this.framesInPage ) {
     exportPage = this.generatePage();
@@ -128,6 +143,9 @@ OggOpusEncoder.prototype.encodeFinalFrame = function() {
       }
       exportPages.concat(this.encode( finalFrameBuffers ));
     }
+  }
+  if (this.config.encodeRaw) {
+	return exportPages;
   }
 
   this.headerType += 4;
@@ -320,10 +338,11 @@ if (typeof registerProcessor === 'function') {
       this.port.onmessage = ({ data }) => {
         if (this.encoder) {
           switch( data['command'] ){
-
             case 'getHeaderPages':
-              this.postPage(this.encoder.generateIdPage());
-              this.postPage(this.encoder.generateCommentPage());
+			  if (!this.encoder.config.encodeRaw) {
+			    this.postPage(this.encoder.generateIdPage());
+	            this.postPage(this.encoder.generateCommentPage());
+			  }
               break;
 
             case 'done':

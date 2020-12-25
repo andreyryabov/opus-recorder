@@ -4,7 +4,7 @@
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
   <title>Ogg Opus Encoder Example</title>
-  <script src="../dist/recorder.min.js"></script>
+  <script src="../dist-unminified/recorder.js"></script>
   <style type='text/css'>
     ul { list-style: none; }
     li { margin: 1em; }
@@ -99,12 +99,15 @@
         //   const context = new AudioContext();
         //   return context.createMediaStreamSource( stream );
         // });
+		// 
 
         var options = {
           monitorGain: parseInt(monitorGain.value, 10),
           recordingGain: parseInt(recordingGain.value, 10),
           numberOfChannels: parseInt(numberOfChannels.value, 10),
           encoderSampleRate: parseInt(encoderSampleRate.value, 10),
+		  streamPages: true,
+		  encodeRaw: true,
           encoderPath: "../dist/encoderWorker.min.js"
           // sourceNode: sourceNode
         };
@@ -187,25 +190,26 @@
         };
 
         recorder.ondataavailable = function( typedArray ){
-          screenLogger('Data received');
-          var dataBlob = new Blob( [typedArray], { type: 'audio/ogg' } );
-          var fileName = new Date().toISOString() + ".opus";
-          var url = URL.createObjectURL( dataBlob );
-
-          var audio = document.createElement('audio');
-          audio.controls = true;
-          audio.src = url;
-
-          var link = document.createElement('a');
-          link.href = url;
-          link.download = fileName;
-          link.innerHTML = link.download;
-
-          var li = document.createElement('li');
-          li.appendChild(link);
-          li.appendChild(audio);
-
-          recordingslist.appendChild(li);
+		  console.log(`-----`, typedArray);
+          //screenLogger('Data received');
+          // var dataBlob = new Blob( [typedArray], { type: 'audio/ogg' } );
+          // var fileName = new Date().toISOString() + ".opus";
+          // var url = URL.createObjectURL( dataBlob );
+          //
+          // var audio = document.createElement('audio');
+          // audio.controls = true;
+          // audio.src = url;
+          //
+          // var link = document.createElement('a');
+          // link.href = url;
+          // link.download = fileName;
+          // link.innerHTML = link.download;
+          //
+          // var li = document.createElement('li');
+          // li.appendChild(link);
+          // li.appendChild(audio);
+          //
+          // recordingslist.appendChild(li);
         };
       });
       // })();
